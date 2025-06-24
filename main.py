@@ -4,9 +4,11 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import r2_score
+import os
 
 # 📂 데이터 로드
-file_path = r"D:\1_Project\상품별월공급량예측모델\data\상품별공급량_MJ.xlsx"
+
+file_path = os.path.join("data", "상품별공급량_MJ.xlsx")
 df = pd.read_excel(file_path, sheet_name="데이터")
 
 # ❌ 불필요 열 제거
