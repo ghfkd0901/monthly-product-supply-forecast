@@ -6,10 +6,14 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import r2_score
 import os
 
-# 📂 데이터 로드
+# ✅ 캐시된 데이터 로드 함수
+@st.cache_data
+def load_data():
+    file_path = os.path.join("data", "상품별공급량_MJ.xlsx")
+    return pd.read_excel(file_path, sheet_name="데이터")
 
-file_path = os.path.join("data", "상품별공급량_MJ.xlsx")
-df = pd.read_excel(file_path, sheet_name="데이터")
+# 📂 데이터 불러오기
+df = load_data()
 
 # ❌ 불필요 열 제거
 df = df.drop(columns=["총합계", "비교(V-W)"])
@@ -66,20 +70,17 @@ models, r2_scores = train_models(filtered_df, product_cols)
 
 # 📊 전체 상품 R² 요약 테이블
 if r2_scores:
-    r2_df = pd.DataFrame([
-        {
-            "상품명": k,
-            "R²": round(v, 4),
-            "예측 적합도": (
-                "✅ 매우 높음" if v >= 0.85 else
-                "✅ 높음" if v >= 0.7 else
-                "⚠️ 보통" if v >= 0.5 else
-                "❌ 낮음" if v >= 0.3 else
-                "❌ 매우 낮음"
-            )
-        }
-        for k, v in r2_scores.items()
-    ]).sort_values(by="R²", ascending=False)
+    r2_df = pd.DataFrame([{
+        "상품명": k,
+        "R²": round(v, 4),
+        "예측 적합도": (
+            "✅ 매우 높음" if v >= 0.85 else
+            "✅ 높음" if v >= 0.7 else
+            "⚠️ 보통" if v >= 0.5 else
+            "❌ 낮음" if v >= 0.3 else
+            "❌ 매우 낮음"
+        )
+    } for k, v in r2_scores.items()]).sort_values(by="R²", ascending=False)
 
     with st.expander("📈 전체 상품의 R² 및 예측 적합도 요약", expanded=False):
         st.dataframe(r2_df, use_container_width=True)

@@ -8,9 +8,14 @@ import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings("ignore")
 
+# ✅ 캐시된 데이터 로드 함수
+@st.cache_data
+def load_data():
+    file_path = os.path.join("data", "상품별공급량_MJ.xlsx")
+    return pd.read_excel(file_path, sheet_name="데이터")
+
 # 📂 데이터 로드
-file_path = os.path.join("data", "상품별공급량_MJ.xlsx")
-df = pd.read_excel(file_path, sheet_name="데이터")
+df = load_data()
 
 # 🗓️ 날짜 처리
 df["날짜"] = pd.to_datetime(df[["연", "월"]].rename(columns={"연": "year", "월": "month"}).assign(day=1))
@@ -54,7 +59,7 @@ for product in selected_products:
     # 예측
     if model_type == "SARIMA":
         series.set_index("날짜", inplace=True)
-        model = SARIMAX(series, order=(1,1,1), seasonal_order=(1,1,1,12)).fit(disp=False)
+        model = SARIMAX(series, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12)).fit(disp=False)
         forecast = model.forecast(steps=forecast_months)
         result_df[f"{product}_예측공급량"] = forecast.values
 
@@ -67,7 +72,7 @@ for product in selected_products:
         forecast = model.predict(future)[["ds", "yhat"]].tail(forecast_months)
         result_df[f"{product}_예측공급량"] = forecast["yhat"].values
 
-    # 예측 그래프 추가 (빨간색)
+    # 예측 그래프 추가 (빨간 점선)
     fig.add_trace(go.Scatter(
         x=result_df["날짜"],
         y=result_df[f"{product}_예측공급량"],

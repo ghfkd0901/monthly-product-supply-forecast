@@ -7,9 +7,14 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import r2_score
 import os
 
-# 📂 데이터 로드
-file_path = os.path.join("data", "상품별공급량_MJ.xlsx")
-df = pd.read_excel(file_path, sheet_name="데이터")
+# ✅ 캐시된 데이터 로드 함수
+@st.cache_data
+def load_data():
+    file_path = os.path.join("data", "상품별공급량_MJ.xlsx")
+    return pd.read_excel(file_path, sheet_name="데이터")
+
+# 📂 데이터 불러오기
+df = load_data()
 
 # ❌ 불필요 열 제거
 df = df.drop(columns=["총합계", "비교(V-W)"])
